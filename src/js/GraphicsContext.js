@@ -1,9 +1,11 @@
 'use strict';
 
-module.exports = (function() {
+function GraphicsContext(gc) {
+    this.gc = gc;
+}
 
-    return {
+GraphicsContext.prototype = {};
+GraphicsContext.prototype.constructor = GraphicsContext;
 
-    };
 
-})();
+module.exports = GraphicsContext;

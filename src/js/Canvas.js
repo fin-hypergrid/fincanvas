@@ -3,6 +3,7 @@
 'use strict';
 
 var gestures = require('../libs/polymergestures.dev.js');
+var GraphicsContext = require('./GraphicsContext.js');
 var rectangles = require('rectangular');
 
 var paintables = [];
@@ -190,9 +191,11 @@ Canvas.prototype.initialize = function() {
     // this.div.appendChild(this.focuser);
 
     this.canvasCTX = this.canvas.getContext('2d');
+    this.gc = new GraphicsContext(this.canvasCTX);
 
     this.buffer = document.createElement('canvas');
     this.bufferCTX = this.buffer.getContext('2d');
+    this.bufferGC = new GraphicsContext(this.bufferCTX);
 
     this.mouseLocation = new this.g.Point(-1, -1);
     this.dragstart = new this.g.Point(-1, -1);
@@ -273,9 +276,7 @@ Canvas.prototype.initialize = function() {
         e.preventDefault();
         return false;
     });
-    // this.canvas.addEventListener('dblclick', function(e) {
-    //     self.findblclick(e);
-    // });
+
     this.canvas.setAttribute('tabindex', 0);
     this.canvas.contentEditable = true;
     this.resize();
