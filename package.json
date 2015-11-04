@@ -1,0 +1,32 @@
+{
+  "name": "finanalytics",
+  "version": "0.1.2",
+  "description": "Openfin Analytics - Data transformations on arrays of congruent JavaScript objects.",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/openfin/finanalytics.git"
+  },
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "author": "SWirts",
+  "license": "MIT",
+  "devDependencies": {
+    "browser-sync": "^2.9.1",
+    "gulp": "^3.9.0",
+    "gulp-beautify": "^2.0.0",
+    "gulp-browserify": "^0.5.1",
+    "gulp-eslint": "^1.0.0",
+    "gulp-exclude-gitignore": "^1.0.0",
+    "gulp-load-plugins": "^1.0.0-rc.1",
+    "gulp-mocha": "^2.1.3",
+    "gulp-sourcemaps": "^1.5.2",
+    "gulp-util": "^3.0.6",
+    "jsdoc": "^3.3.2",
+    "run-sequence": "^1.1.4",
+    "should": "^7.1.1",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}
