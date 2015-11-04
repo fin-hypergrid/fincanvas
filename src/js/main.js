@@ -5,6 +5,6 @@
 if (!window.fin) {
     window.fin = {};
 }
-if (!window.fin.analytics) {
-    window.fin.analytics = require('./analytics.js');
+if (!window.fin.canvas) {
+    window.fin.canvas = require('./Canvas.js');
 }
