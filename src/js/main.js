@@ -5,6 +5,6 @@
 if (!window.fin) {
     window.fin = {};
 }
-if (!window.fin.canvas) {
-    window.fin.canvas = require('./Canvas.js');
+if (!window.fin.Canvas) {
+    window.fin.Canvas = require('./Canvas.js');
 }

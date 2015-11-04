@@ -7,7 +7,7 @@
  * Code distributed by Google as part of the polymer project is also
  * subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
  */
-window.PolymerGestures = {};
+//module.exports = {};
 
 (function(scope) {
   var hasFullPath = false;
@@ -243,7 +243,7 @@ window.PolymerGestures = {};
    */
   scope.insideNode = target.insideNode;
 
-})(window.PolymerGestures);
+})(module.exports);
 
 (function() {
   function shadowSelector(v) {
@@ -413,7 +413,7 @@ window.PolymerGestures = {};
   };
 
   scope.eventFactory = eventFactory;
-})(window.PolymerGestures);
+})(module.exports);
 
 /**
  * This module implements an map of pointer states
@@ -472,7 +472,7 @@ window.PolymerGestures = {};
   };
 
   scope.PointerMap = PointerMap;
-})(window.PolymerGestures);
+})(module.exports);
 
 (function(scope) {
   var CLONE_PROPS = [
@@ -938,7 +938,7 @@ window.PolymerGestures = {};
       node.removeEventListener(gesture, handler, capture);
     }
   };
-})(window.PolymerGestures);
+})(module.exports);
 
 (function(scope) {
   var dispatcher = scope.dispatcher;
@@ -1065,7 +1065,7 @@ window.PolymerGestures = {};
   };
 
   scope.mouseEvents = mouseEvents;
-})(window.PolymerGestures);
+})(module.exports);
 
 (function(scope) {
   var dispatcher = scope.dispatcher;
@@ -1398,7 +1398,7 @@ window.PolymerGestures = {};
   }, true);
 
   scope.touchEvents = touchEvents;
-})(window.PolymerGestures);
+})(module.exports);
 
 (function(scope) {
   var dispatcher = scope.dispatcher;
@@ -1470,7 +1470,7 @@ window.PolymerGestures = {};
   };
 
   scope.msEvents = msEvents;
-})(window.PolymerGestures);
+})(module.exports);
 
 (function(scope) {
   var dispatcher = scope.dispatcher;
@@ -1530,7 +1530,7 @@ window.PolymerGestures = {};
   };
 
   scope.pointerEvents = pointerEvents;
-})(window.PolymerGestures);
+})(module.exports);
 
 /**
  * This module contains the handlers for native platform events.
@@ -1561,7 +1561,7 @@ window.PolymerGestures = {};
   scope.touchEvents.IS_IOS = IS_IOS;
 
   dispatcher.register(document, true);
-})(window.PolymerGestures);
+})(module.exports);
 
 /**
  * This event denotes the beginning of a series of tracking events.
@@ -1783,7 +1783,7 @@ window.PolymerGestures = {};
      }
    };
    dispatcher.registerGesture('track', track);
- })(window.PolymerGestures);
+ })(module.exports);
 
 /**
  * This event is fired when a pointer is held down for 200ms.
@@ -1904,7 +1904,7 @@ window.PolymerGestures = {};
     }
   };
   dispatcher.registerGesture('hold', hold);
-})(window.PolymerGestures);
+})(module.exports);
 
 /**
  * This event is fired when a pointer quickly goes down and up, and is used to
@@ -1999,7 +1999,7 @@ window.PolymerGestures = {};
     };
   };
   dispatcher.registerGesture('tap', tap);
-})(window.PolymerGestures);
+})(module.exports);
 
 /*
  * Basic strategy: find the farthest apart points, use as diameter of circle
