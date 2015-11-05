@@ -18,48 +18,38 @@
 </head>
 
 <body>
-<div id="canvas" fps="30"></div>
+<div id="canvas" fps="60"></div>
 </body>
     <script>
-        var div = document.querySelector('#canvas');
-        var component = {
-            setBounds: function(rectangle) {
-                this.bounds = rectangle;
+        var div = document.querySelector('#canvas'),
+            main = function(gc) {
+                var rect = this.bounds;
+                gc.translate(rect.left, rect.top);
+                gc.rect(0, 0, rect.width, rect.height);
+                gc.clip();
+                gc.beginPath();
+                gc.fillStyle = 'pink';
+                gc.fillRect(0, 0, rect.width, rect.height);
             },
-            _paint: function(gc) {
-                try {
-                    var rect = this.bounds;
-                    gc.save();
-                    gc.translate(rect.left, rect.top);
-                    gc.rect(0, 0, rect.width, rect.height);
-                    gc.clip();
-                    var bgColor = 'pink';
-                    if (bgColor) {
-                        gc.beginPath();
-                        gc.fillStyle = bgColor;
-                        gc.fillRect(0, 0, rect.width, rect.height);
-                        gc.stroke();
-                }
-                //this.paint(gc);
-                } finally {
-                    gc.restore();
-                }
-                }
-            }
-        var c = new fin.Canvas(div, component);
+            component = {
+                setBounds: function(rectangle) {
+                    this.bounds = rectangle;
+                },
+                _paint: main
+            },
+            c = new fin.Canvas(div, component),
+            eventNames = ['fin-canvas-dragstart','fin-canvas-drag', 'fin-canvas-mousemove', 'fin-canvas-mousedown', 'fin-canvas-dragend', 'fin-canvas-mouseup', 'fin-canvas-mouseout', 'fin-canvas-wheelmoved', 'fin-canvas-click', 'fin-canvas-release', 'fin-canvas-flick', 'fin-canvas-trackstart', 'fin-canvas-track', 'fin-canvas-trackend', 'fin-canvas-hold', 'fin-canvas-holdpulse', 'fin-canvas-tap', 'fin-canvas-dblclick', 'fin-canvas-keydown', 'fin-canvas-keyup', 'fin-canvas-focus-gained', 'fin-canvas-focus-lost', 'fin-canvas-context-menu'];
+
         setInterval(function() {
             c.repaint();
         }, 100);
 
-
-        var eventNames = ['fin-canvas-dragstart','fin-canvas-drag', 'fin-canvas-mousemove', 'fin-canvas-mousedown', 'fin-canvas-dragend', 'fin-canvas-mouseup', 'fin-canvas-mouseout', 'fin-canvas-wheelmoved', 'fin-canvas-click', 'fin-canvas-release', 'fin-canvas-flick', 'fin-canvas-trackstart', 'fin-canvas-track', 'fin-canvas-trackend', 'fin-canvas-hold', 'fin-canvas-holdpulse', 'fin-canvas-tap', 'fin-canvas-dblclick', 'fin-canvas-keydown', 'fin-canvas-keyup', 'fin-canvas-focus-gained', 'fin-canvas-focus-lost', 'fin-canvas-context-menu'];
-
-        var logit = function(e) {
-            console.log(e.type);
-        };
-
         eventNames.forEach(function(name) {
             c.addEventListener(name, logit);
         });
+
+        function logit(e) {
+            console.log(e.type);
+        }
     </script>
 </html>

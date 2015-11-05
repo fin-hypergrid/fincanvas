@@ -28,6 +28,10 @@ gulp.task('doc', doc);
 gulp.task('beautify', beautify);
 gulp.task('browserify', browserify);
 gulp.task('browserSyncLaunchServer', browserSyncLaunchServer);
+gulp.task('copyStaticFiles', function() {
+    return gulp.src(srcDir + '*.html')
+        .pipe(gulp.dest(buildDir));
+});
 
 gulp.task('build', function(callback) {
     clearBashScreen();
@@ -37,12 +41,14 @@ gulp.task('build', function(callback) {
         'doc',
         'beautify',
         'browserify',
+        'copyStaticFiles',
         callback
     );
 });
 
 gulp.task('watch', function () {
-    gulp.watch([srcDir + '**', testDir + '**'], ['build'])
+    gulp.watch([srcDir + '**', testDir + '**'], ['build']);
+    gulp.watch([buildDir + '**'])
         .on('change', function(event) {
             browserSync.reload();
         });
