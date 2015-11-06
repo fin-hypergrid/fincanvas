@@ -7,17 +7,22 @@
     <title>fincanvas</title>
     <script src="main.js"></script>
     <style>
-    #canvas {
-        position: absolute;
-        top: 5%;
-        right: 5%;
-        bottom: 5%;
-        left: 5%;
-    }
+        body {
+            font-family: sans-serif;
+            font-size: small;
+        }
+        #canvas {
+            position: absolute;
+            top: 5%;
+            right: 5%;
+            bottom: 5%;
+            left: 5%;
+        }
     </style>
 </head>
 
 <body>
+<input id="repaint" type="checkbox" checked/> Repaint
 <div id="canvas" fps="60"></div>
 </body>
     <script>
@@ -45,11 +50,16 @@
         }, 100);
 
         eventNames.forEach(function(name) {
-            c.addEventListener(name, logit);
+            c.addEventListener(name, logEvt);
         });
 
-        function logit(e) {
+        document.querySelector('#repaint').onclick = function() {
+            c[this.checked ? 'restartPaintThread' : 'stopPaintThread']();
+        };
+
+        function logEvt(e) {
             console.log(e.type);
         }
+
     </script>
 </html>

@@ -243,7 +243,7 @@
    */
   scope.insideNode = target.insideNode;
 
-})(module.exports);
+})(exports);
 
 (function() {
   function shadowSelector(v) {
@@ -413,7 +413,7 @@
   };
 
   scope.eventFactory = eventFactory;
-})(module.exports);
+})(exports);
 
 /**
  * This module implements an map of pointer states
@@ -472,7 +472,7 @@
   };
 
   scope.PointerMap = PointerMap;
-})(module.exports);
+})(exports);
 
 (function(scope) {
   var CLONE_PROPS = [
@@ -938,7 +938,7 @@
       node.removeEventListener(gesture, handler, capture);
     }
   };
-})(module.exports);
+})(exports);
 
 (function(scope) {
   var dispatcher = scope.dispatcher;
@@ -1065,7 +1065,7 @@
   };
 
   scope.mouseEvents = mouseEvents;
-})(module.exports);
+})(exports);
 
 (function(scope) {
   var dispatcher = scope.dispatcher;
@@ -1398,7 +1398,7 @@
   }, true);
 
   scope.touchEvents = touchEvents;
-})(module.exports);
+})(exports);
 
 (function(scope) {
   var dispatcher = scope.dispatcher;
@@ -1470,7 +1470,7 @@
   };
 
   scope.msEvents = msEvents;
-})(module.exports);
+})(exports);
 
 (function(scope) {
   var dispatcher = scope.dispatcher;
@@ -1530,7 +1530,7 @@
   };
 
   scope.pointerEvents = pointerEvents;
-})(module.exports);
+})(exports);
 
 /**
  * This module contains the handlers for native platform events.
@@ -1561,7 +1561,7 @@
   scope.touchEvents.IS_IOS = IS_IOS;
 
   dispatcher.register(document, true);
-})(module.exports);
+})(exports);
 
 /**
  * This event denotes the beginning of a series of tracking events.
@@ -1783,7 +1783,7 @@
      }
    };
    dispatcher.registerGesture('track', track);
- })(module.exports);
+ })(exports);
 
 /**
  * This event is fired when a pointer is held down for 200ms.
@@ -1904,7 +1904,7 @@
     }
   };
   dispatcher.registerGesture('hold', hold);
-})(module.exports);
+})(exports);
 
 /**
  * This event is fired when a pointer quickly goes down and up, and is used to
@@ -1999,7 +1999,7 @@
     };
   };
   dispatcher.registerGesture('tap', tap);
-})(module.exports);
+})(exports);
 
 /*
  * Basic strategy: find the farthest apart points, use as diameter of circle
@@ -2177,4 +2177,4 @@
     }
   };
   dispatcher.registerGesture('pinch', pinch);
-})(module.exports);
+})(exports);

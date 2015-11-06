@@ -17,7 +17,7 @@ var paintLoopFunction = function(now) {
     }
     for (var i = 0; i < paintables.length; i++) {
         try {
-            paintables[i](now);
+            paintables[i].tickPainter(now);
         } catch (e) {
             console.error(e);
         }
@@ -33,7 +33,7 @@ var resizablesLoopFunction = function(now) {
     }
     for (var i = 0; i < resizables.length; i++) {
         try {
-            resizables[i](now);
+            resizables[i].tickResizer(now);
         } catch (e) {
             console.error(e);
         }
@@ -124,7 +124,7 @@ function Canvas(div, component) {
 }
 
 Canvas.prototype = {
-    constructor: Canvas,
+    constructor: Canvas.prototype.constructor,
     gestures: gestures,
     g: null,
     div: null,
@@ -295,7 +295,7 @@ Canvas.prototype = {
     },
 
     getFPS: function() {
-        var fps = this.canvas.getAttribute('fps');
+        var fps = this.canvas.parentElement.getAttribute('fps');
         return fps ? parseInt(fps) : 0;
     },
 
@@ -324,11 +324,11 @@ Canvas.prototype = {
         this.tickPainter = function(now) {
             self.tickPaint(now);
         };
-        paintables.push(this.tickPainter);
+        paintables.push(this);
     },
 
     stopPainting: function() {
-        paintables.splice(paintables.indexOf(this.tickPainter), 1);
+        paintables.splice(paintables.indexOf(this), 1);
     },
 
     beginResizing: function() {
@@ -336,11 +336,11 @@ Canvas.prototype = {
         this.tickResizer = function() {
             self.checksize();
         };
-        resizables.push(this.tickResizer);
+        resizables.push(this);
     },
 
     stopResizing: function() {
-        resizables.splice(resizables.indexOf(this.tickResizer), 1);
+        resizables.splice(resizables.indexOf(this), 1);
     },
 
     checksize: function() {
@@ -428,8 +428,8 @@ Canvas.prototype = {
     },
 
     safePaintImmediately: function(paintFunction) {
-        var useBitBlit = this.useBitBlit();
-        var gc = useBitBlit ? this.bufferCTX : this.canvasCTX;
+        var useBitBlit = this.useBitBlit(),
+            gc = useBitBlit ? this.bufferGC : this.canvasCTX;
         try {
             gc.save();
             paintFunction(gc);
@@ -727,7 +727,7 @@ Canvas.prototype = {
     repaint: function() {
         var fps = this.getFPS();
         this.repaintNow = true;
-        if (!paintLoopRunning || fps === 0) {
+        if (paintLoopRunning && fps > 0) { // TODO: was (!paintLoopRunning || fps === 0)
             this.paintNow();
         }
     },
