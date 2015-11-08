@@ -43,19 +43,43 @@
                 _paint: main
             },
             c = new fin.Canvas(div, component),
-            eventNames = ['fin-canvas-dragstart','fin-canvas-drag', 'fin-canvas-mousemove', 'fin-canvas-mousedown', 'fin-canvas-dragend', 'fin-canvas-mouseup', 'fin-canvas-mouseout', 'fin-canvas-wheelmoved', 'fin-canvas-click', 'fin-canvas-release', 'fin-canvas-flick', 'fin-canvas-trackstart', 'fin-canvas-track', 'fin-canvas-trackend', 'fin-canvas-hold', 'fin-canvas-holdpulse', 'fin-canvas-tap', 'fin-canvas-dblclick', 'fin-canvas-keydown', 'fin-canvas-keyup', 'fin-canvas-focus-gained', 'fin-canvas-focus-lost', 'fin-canvas-context-menu'];
-
-        setInterval(function() {
-            c.repaint();
-        }, 100);
+            eventNames = [
+                'dragstart',
+                'drag',
+                'mousemove',
+                'mousedown',
+                'dragend',
+                'mouseup',
+                'mouseout',
+                'wheelmoved',
+                'click',
+                'release',
+                'flick',
+                'trackstart',
+                'track',
+                'trackend',
+                'hold',
+                'holdpulse',
+                'tap',
+                'dblclick',
+                'keydown',
+                'keyup',
+                'focus-gained',
+                'focus-lost',
+                'context-menu'
+            ];
 
         eventNames.forEach(function(name) {
-            c.addEventListener(name, logEvt);
+            c.addEventListener('fin-canvas-' + name, logEvt);
         });
 
         document.querySelector('#repaint').onclick = function() {
             c[this.checked ? 'restartPaintThread' : 'stopPaintThread']();
         };
+
+        setInterval(function() {
+            c.repaint();
+        }, 100);
 
         function logEvt(e) {
             console.log(e.type);
