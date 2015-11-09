@@ -138,7 +138,7 @@ Canvas.prototype = {
     dragstart: null,
     origin: null,
     bounds: null,
-    repaintNow: false,
+    dirty: false,
     size: null,
     mousedown: false,
     dragging: false,
@@ -149,6 +149,7 @@ Canvas.prototype = {
     hasMouse: false,
     lastDoubleClickTime: 0,
     dragEndTime: 0,
+    lastRepaintTime: 0,
 
     initialize: function() {
         var self = this;
@@ -309,18 +310,17 @@ Canvas.prototype = {
             return;
         }
         var interval = 1000 / fps;
-        var lastRepaintTime = 0;
 
-        var delta = now - lastRepaintTime;
-        if (delta > interval && this.repaintNow) {
-            lastRepaintTime = now - (delta % interval); // TODO: This value not used ???
+        var elapsed = now - this.lastRepaintTime;
+        if (elapsed > interval && this.dirty) {
+            this.lastRepaintTime = now - (elapsed % interval);
             this.paintNow();
         }
     },
 
     beginPainting: function() {
         var self = this;
-        this.repaintNow = true;
+        this.dirty = true;
         this.tickPainter = function(now) {
             self.tickPaint(now);
         };
@@ -423,7 +423,7 @@ Canvas.prototype = {
         this.safePaintImmediately(function(gc) {
             gc.clearRect(0, 0, self.canvas.width, self.canvas.height);
             self.paint(gc);
-            self.repaintNow = false;
+            self.dirty = false;
         });
     },
 
@@ -726,8 +726,8 @@ Canvas.prototype = {
 
     repaint: function() {
         var fps = this.getFPS();
-        this.repaintNow = true;
-        if (paintLoopRunning && fps > 0) { // TODO: was (!paintLoopRunning || fps === 0)
+        this.dirty = true;
+        if (!paintLoopRunning || fps === 0) {
             this.paintNow();
         }
     },
