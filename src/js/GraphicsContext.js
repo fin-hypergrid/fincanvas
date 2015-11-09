@@ -40,9 +40,13 @@ GraphicsContext.prototype = {
 var YIELDS = '\u27F9'; // LONG RIGHTWARDS DOUBLE ARROW
 
 function logger(name, args, value) {
-    name = 'GC.' + name;
+    var result = value;
 
-    var result = typeof value === 'string' ? '"' + value + '"' : value;
+    if (typeof value === 'string') {
+        result = '"' + result + '"';
+    }
+
+    name = 'GC.' + name;
 
     switch (args) {
         case 'getter':
