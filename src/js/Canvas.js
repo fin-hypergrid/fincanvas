@@ -466,7 +466,7 @@ Canvas.prototype = {
         detail = detail || {};
         detail.mouse = this.mouseLocation;
         detail.keys = this.currentKeys;
-        return this.dispatchNewEvent(name, event, detail);
+        return this.dispatchNewEvent(event, name, detail);
     },
 
     finmousemove: function(e) {
