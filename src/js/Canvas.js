@@ -4,7 +4,7 @@
 
 var gestures = require('../libs/polymergestures.dev.js');
 var GraphicsContext = require('./GraphicsContext.js');
-var rectangles = require('rectangular');
+var rectangular = require('rectangular');
 
 var paintables = [];
 var resizables = [];
@@ -125,8 +125,7 @@ function Canvas(div, component) {
 
 Canvas.prototype = {
     constructor: Canvas.prototype.constructor,
-    gestures: gestures,
-    g: null,
+    gestures: gestures, // TODO: why do we need this? (was previously at bottom of file)
     div: null,
     canvas: null,
     canvasCTX: null,
@@ -153,8 +152,8 @@ Canvas.prototype = {
 
     initialize: function() {
         var self = this;
+
         this.dragEndtime = Date.now();
-        this.g = rectangles;
 
         this.canvas = document.createElement('canvas');
         this.div.appendChild(this.canvas);
@@ -176,10 +175,10 @@ Canvas.prototype = {
         this.bufferCTX = this.buffer.getContext('2d');
         this.bufferGC = new GraphicsContext(this.bufferCTX);
 
-        this.mouseLocation = new this.g.Point(-1, -1);
-        this.dragstart = new this.g.Point(-1, -1);
-        //this.origin = new this.g.Point(0, 0);
-        this.bounds = new this.g.Rectangle(0, 0, 0, 0);
+        this.mouseLocation = new rectangular.Point(-1, -1);
+        this.dragstart = new rectangular.Point(-1, -1);
+        //this.origin = new rectangular.Point(0, 0);
+        this.bounds = new rectangular.Rectangle(0, 0, 0, 0);
         this.hasMouse = false;
 
         document.addEventListener('mousemove', function(e) {
@@ -249,7 +248,9 @@ Canvas.prototype = {
 
         this.canvas.setAttribute('tabindex', 0);
         this.canvas.contentEditable = true;
+
         this.resize();
+
         this.beginResizing();
         this.beginPainting();
     },
@@ -258,11 +259,11 @@ Canvas.prototype = {
         this.canvas.addEventListener(name, callback);
     },
 
-    stopPaintThread: function() {
+    stopPaintLoop: function() {
         paintLoopRunning = false;
     },
 
-    restartPaintThread: function() {
+    restartPaintLoop: function() {
         if (paintLoopRunning) {
             return; // already running
         }
@@ -270,11 +271,11 @@ Canvas.prototype = {
         requestAnimationFrame(paintLoopFunction);
     },
 
-    stopResizeThread: function() {
+    stopResizeLoop: function() {
         resizeLoopRunning = false;
     },
 
-    restartResizeThread: function() {
+    restartResizeLoop: function() {
         if (resizeLoopRunning) {
             return; // already running
         }
@@ -343,6 +344,16 @@ Canvas.prototype = {
         resizables.splice(resizables.indexOf(this), 1);
     },
 
+    start: function() {
+        this.beginPainting();
+        this.beginResizing();
+    },
+
+    stop: function() {
+        this.stopPainting();
+        this.stopResizing();
+    },
+
     checksize: function() {
         //this is expensive lets do it at some modulo
         var sizeNow = this.div.getBoundingClientRect();
@@ -398,8 +409,8 @@ Canvas.prototype = {
             this.canvasCTX.scale(ratio, ratio);
         }
 
-        //this.origin = new this.g.Point(Math.round(this.size.left), Math.round(this.size.top));
-        this.bounds = new this.g.Rectangle(0, 0, this.size.width, this.size.height);
+        //this.origin = new rectangular.Point(Math.round(this.size.left), Math.round(this.size.top));
+        this.bounds = new rectangular.Rectangle(0, 0, this.size.width, this.size.height);
         //setTimeout(function() {
         var comp = this.getComponent();
         if (comp) {
@@ -422,14 +433,19 @@ Canvas.prototype = {
         var self = this;
         this.safePaintImmediately(function(gc) {
             gc.clearRect(0, 0, self.canvas.width, self.canvas.height);
-            self.paint(gc);
+
+            var comp = self.getComponent();
+            if (comp) {
+                comp._paint(gc);
+            }
+
             self.dirty = false;
         });
     },
 
     safePaintImmediately: function(paintFunction) {
         var useBitBlit = this.useBitBlit(),
-            gc = useBitBlit ? this.bufferGC : this.canvasCTX;
+            gc = useBitBlit ? this.bufferGC : this.gc;
         try {
             gc.save();
             paintFunction(gc);
@@ -444,13 +460,6 @@ Canvas.prototype = {
     flushBuffer: function() {
         if (this.buffer.width > 0 && this.buffer.height > 0) {
             this.canvasCTX.drawImage(this.buffer, 0, 0);
-        }
-    },
-
-    paint: function(gc) {
-        var comp = this.getComponent();
-        if (comp) {
-            comp._paint(gc);
         }
     },
 
@@ -475,7 +484,7 @@ Canvas.prototype = {
             this.dispatchNewMouseKeysEvent(e, 'fin-canvas-dragstart', {
                 isRightClick: this.isRightClick(e)
             });
-            this.dragstart = new this.g.Point(this.mouseLocation.x, this.mouseLocation.y);
+            this.dragstart = new rectangular.Point(this.mouseLocation.x, this.mouseLocation.y);
         }
         this.mouseLocation = this.getLocal(e);
         if (this.isDragging()) {
@@ -512,12 +521,12 @@ Canvas.prototype = {
         this.dispatchNewMouseKeysEvent(e, 'fin-canvas-mouseup', {
             isRightClick: this.isRightClick(e)
         });
-        //this.mouseLocation = new this.g.Point(-1, -1);
+        //this.mouseLocation = new rectangular.Point(-1, -1);
     },
 
     finmouseout: function(e) {
         if (!this.mousedown) {
-            this.mouseLocation = new this.g.Point(-1, -1);
+            this.mouseLocation = new rectangular.Point(-1, -1);
         }
         this.dispatchNewMouseKeysEvent(e, 'fin-canvas-mouseout');
     },
@@ -738,13 +747,13 @@ Canvas.prototype = {
 
     getOrigin: function() {
         var rect = this.canvas.getBoundingClientRect();
-        var p = new this.g.Point(rect.left, rect.top);
+        var p = new rectangular.Point(rect.left, rect.top);
         return p;
     },
 
     getLocal: function(e) {
         var rect = this.canvas.getBoundingClientRect();
-        var p = new this.g.Point((e.x || e.clientX) - rect.left, (e.y || e.clientY) - rect.top);
+        var p = new rectangular.Point(e.clientX - rect.left, e.clientY - rect.top);
         return p;
     },
 
@@ -786,7 +795,7 @@ Canvas.prototype = {
     },
 
     setFocusable: function(truthy) {
-        this.focuser.style.display = truthy ? '' : 'none'; // previously boolean === true
+        this.focuser.style.display = truthy ? '' : 'none';
     },
 
     isRightClick: function(e) {

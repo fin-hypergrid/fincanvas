@@ -2,14 +2,14 @@
 
 function GraphicsContext(gc) {
     this.gc = gc;
-    this.addMissingStubs(gc, logger); // logger may be omitted
+    this.addMissingStubs(gc); // logger may be omitted
 }
 
 GraphicsContext.prototype = {
 
     constructor: GraphicsContext.prototype.constructor,
 
-    addMissingStubs: function(gc) {
+    addMissingStubs: function(gc, logger) {
         var self = this;
         var reWEBKIT = /^webkit/;
 
@@ -39,7 +39,7 @@ GraphicsContext.prototype = {
 
 var YIELDS = '\u27F9'; // LONG RIGHTWARDS DOUBLE ARROW
 
-function logger(name, args, value) {
+function consoleLogger(name, args, value) { // eslint-disable-line no-unused-vars
     var result = value;
 
     if (typeof value === 'string') {

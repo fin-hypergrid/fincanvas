@@ -18,31 +18,30 @@
             bottom: 5%;
             left: 5%;
         }
+        input {
+            margin-left: .75em;
+        }
     </style>
 </head>
 
 <body>
-<input id="repaint" type="checkbox" checked/> Repaint
-<div id="canvas" fps="60"></div>
+    <input type="button" id="dirtify" value="Make Dirty" style="margin-right: 2em" />
+
+    Paint Loop:
+    <input type="radio" name="paintLoop" value="restartPaintLoop" checked />On
+    <input type="radio" name="paintLoop" value="stopPaintLoop" />Off
+
+    <div id="canvas" fps="60"></div>
 </body>
     <script>
         var div = document.querySelector('#canvas'),
-            main = function(gc) {
-                var rect = this.bounds;
-                gc.translate(rect.left, rect.top);
-                gc.rect(0, 0, rect.width, rect.height);
-                gc.clip();
-                gc.beginPath();
-                gc.fillStyle = 'pink';
-                gc.fillRect(0, 0, rect.width, rect.height);
-            },
             component = {
                 setBounds: function(rectangle) {
                     this.bounds = rectangle;
                 },
                 _paint: main
-            },
-            c = new fin.Canvas(div, component),
+            };
+         var c = new fin.Canvas(div, component),
             eventNames = [
                 'dragstart',
                 'drag',
@@ -69,20 +68,111 @@
                 'context-menu'
             ];
 
+        c.start();
+
         eventNames.forEach(function(name) {
             c.addEventListener('fin-canvas-' + name, logEvt);
         });
 
-        document.querySelector('#repaint').onclick = function() {
-            c[this.checked ? 'restartPaintThread' : 'stopPaintThread']();
+        function $(selector) {
+            return Array.prototype.slice.call(document.querySelectorAll(selector));
+        }
+
+        $('input[type=radio][name=paintLoop]').forEach(function(element) {
+            element.onclick = togglePaintLoop;
+        });
+
+        function togglePaintLoop() {
+            if (this.checked) { c[this.value](); }
+        }
+
+        document.querySelector('#dirtify').onclick = function() {
+            c.dirty = true;
         };
 
-        // setInterval(function() {
-        //     c.repaint();
-        // }, 100);
+         setInterval(function() {
+             c.repaint();
+         }, 10);
 
         function logEvt(e) {
             console.log(e.type);
+        }
+
+        function main(gc) {
+            var rect = this.bounds;
+            gc.beginPath();
+            gc.fillStyle = 'pink';
+            gc.fillRect(0, 0, rect.width, rect.height);
+
+            drawClock.call(this, gc);
+        }
+
+        function drawClock(gc) {
+            var dt = new Date;
+
+            gc.save();
+
+            gc.translate(55, 55);
+
+            // 60 tick marks
+            gc.save();
+            gc.beginPath();
+            for(var intervals = 60, incr = 2 * Math.PI / intervals; intervals--;) {
+                gc.rotate(incr);
+                gc.moveTo(0, 50);
+                gc.lineTo(0, 46);
+            }
+            gc.strokeWidth = 0.5;
+            gc.stroke();
+            gc.restore();
+
+            gc.beginPath();
+
+            // minute hand
+            gc.save();
+            gc.rotate((dt.getMinutes() / 30 - 1) * Math.PI);
+            gc.moveTo(0, 40);
+            gc.lineTo(-2, 32);
+            gc.lineTo(0, 0);
+            gc.lineTo(2, 32);
+            gc.closePath();
+            gc.restore();
+
+            // hour hand
+            gc.save();
+            gc.rotate((dt.getHours() / 6 + dt.getMinutes() / 720 - 1) * Math.PI);
+            gc.moveTo(0, 30);
+            gc.lineTo(-4, 22);
+            gc.lineTo(0, 0);
+            gc.lineTo(4, 22);
+            gc.closePath();
+            gc.restore();
+
+            gc.stroke();
+            gc.fillStyle = 'black';
+            gc.fill();
+
+            // second hand
+            gc.save();
+            gc.beginPath();
+            gc.rotate((dt.getSeconds() / 30 - 1) * Math.PI);
+            gc.moveTo(0, 45);
+            gc.lineTo(0, 0);
+            gc.strokeStyle = 'red';
+            gc.stroke();
+            gc.restore();
+
+            // second hand
+            gc.save();
+            gc.beginPath();
+            gc.rotate((dt.getMilliseconds() / 500 - 1) * Math.PI);
+            gc.moveTo(0, 20);
+            gc.lineTo(0, 0);
+            gc.strokeStyle = 'green';
+            gc.stroke();
+            gc.restore();
+
+            gc.restore();
         }
 
     </script>
