@@ -131,20 +131,20 @@
             // minute hand
             gc.save();
             gc.rotate((dt.getMinutes() / 30 - 1) * Math.PI);
-            gc.moveTo(0, 40);
-            gc.lineTo(-2, 32);
-            gc.lineTo(0, 0);
-            gc.lineTo(2, 32);
+            gc.moveTo(0, 43);
+            gc.lineTo(-2, 30);
+            gc.lineTo(0, -10);
+            gc.lineTo(2, 30);
             gc.closePath();
             gc.restore();
 
             // hour hand
             gc.save();
             gc.rotate((dt.getHours() / 6 + dt.getMinutes() / 720 - 1) * Math.PI);
-            gc.moveTo(0, 30);
-            gc.lineTo(-4, 22);
-            gc.lineTo(0, 0);
-            gc.lineTo(4, 22);
+            gc.moveTo(0, 26);
+            gc.lineTo(-3, 20);
+            gc.lineTo(0, -7);
+            gc.lineTo(3, 20);
             gc.closePath();
             gc.restore();
 
@@ -157,7 +157,7 @@
             gc.beginPath();
             gc.rotate((dt.getSeconds() / 30 - 1) * Math.PI);
             gc.moveTo(0, 45);
-            gc.lineTo(0, 0);
+            gc.lineTo(0, -10);
             gc.strokeStyle = 'red';
             gc.stroke();
             gc.restore();

@@ -39,7 +39,7 @@ gulp.task('build', function(callback) {
         'lint',
         'test',
         'doc',
-        'beautify',
+        //'beautify',
         'browserify',
         'copyStaticFiles',
         callback

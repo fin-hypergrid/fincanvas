@@ -2,7 +2,7 @@
 
 'use strict';
 
-var gestures = require('../libs/polymergestures.dev.js');
+var gestures = require('./polymergestures.dev.js');
 var GraphicsContext = require('./GraphicsContext.js');
 var rectangular = require('rectangular');
 
@@ -293,7 +293,7 @@ Canvas.prototype = {
     },
 
     useBitBlit: function() {
-        return this.canvas.getAttribute('bitblit') !== 'false';
+        return false; //this.canvas.getAttribute('bitblit') !== 'false';
     },
 
     getFPS: function() {
