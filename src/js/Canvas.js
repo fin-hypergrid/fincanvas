@@ -2,131 +2,130 @@
 
 'use strict';
 
+var rectangular = require('../rectangular/rectangular');
+
 var gestures = require('./polymergestures.dev.js');
 var GraphicsContext = require('./GraphicsContext.js');
-var rectangular = require('rectangular');
 
+var charMap = [];
 var paintables = [];
 var resizables = [];
 var paintLoopRunning = true;
 var resizeLoopRunning = true;
 
-var paintLoopFunction = function(now) {
-    if (!paintLoopRunning) {
-        return;
-    }
-    for (var i = 0; i < paintables.length; i++) {
-        try {
-            paintables[i].tickPainter(now);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-    requestAnimationFrame(paintLoopFunction);
-};
-requestAnimationFrame(paintLoopFunction);
-
-
-var resizablesLoopFunction = function(now) {
-    if (!resizeLoopRunning) {
-        return;
-    }
-    for (var i = 0; i < resizables.length; i++) {
-        try {
-            resizables[i].tickResizer(now);
-        } catch (e) {
-            console.error(e);
-        }
-    }
-};
-setInterval(resizablesLoopFunction, 200);
-
-var charMap = [];
-var empty = ['', ''];
-for (var i = 0; i < 256; i++) {
-    charMap[i] = empty;
-}
-
-charMap[27] = ['ESC', 'ESCSHIFT'];
-charMap[192] = ['`', '~'];
-charMap[49] = ['1', '!'];
-charMap[50] = ['2', '@'];
-charMap[51] = ['3', '#'];
-charMap[52] = ['4', '$'];
-charMap[53] = ['5', '%'];
-charMap[54] = ['6', '^'];
-charMap[55] = ['7', '&'];
-charMap[56] = ['8', '*'];
-charMap[57] = ['9', '('];
-charMap[48] = ['0', ')'];
-charMap[189] = ['-', '_'];
-charMap[187] = ['=', '+'];
-charMap[8] = ['DELETE', 'DELETESHIFT'];
-charMap[9] = ['TAB', 'TABSHIFT'];
-charMap[81] = ['q', 'Q'];
-charMap[87] = ['w', 'W'];
-charMap[69] = ['e', 'E'];
-charMap[82] = ['r', 'R'];
-charMap[84] = ['t', 'T'];
-charMap[89] = ['y', 'Y'];
-charMap[85] = ['u', 'U'];
-charMap[73] = ['i', 'I'];
-charMap[79] = ['o', 'O'];
-charMap[80] = ['p', 'P'];
-charMap[219] = ['[', '{'];
-charMap[221] = [']', '}'];
-charMap[220] = ['\\', '|'];
-charMap[220] = ['CAPSLOCK', 'CAPSLOCKSHIFT'];
-charMap[65] = ['a', 'A'];
-charMap[83] = ['s', 'S'];
-charMap[68] = ['d', 'D'];
-charMap[70] = ['f', 'F'];
-charMap[71] = ['g', 'G'];
-charMap[72] = ['h', 'H'];
-charMap[74] = ['j', 'J'];
-charMap[75] = ['k', 'K'];
-charMap[76] = ['l', 'L'];
-charMap[186] = [';', ':'];
-charMap[222] = ['\'', '|'];
-charMap[13] = ['RETURN', 'RETURNSHIFT'];
-charMap[16] = ['SHIFT', 'SHIFT'];
-charMap[90] = ['z', 'Z'];
-charMap[88] = ['x', 'X'];
-charMap[67] = ['c', 'C'];
-charMap[86] = ['v', 'V'];
-charMap[66] = ['b', 'B'];
-charMap[78] = ['n', 'N'];
-charMap[77] = ['m', 'M'];
-charMap[188] = [',', '<'];
-charMap[190] = ['.', '>'];
-charMap[191] = ['/', '?'];
-charMap[16] = ['SHIFT', 'SHIFT'];
-charMap[17] = ['CTRL', 'CTRLSHIFT'];
-charMap[18] = ['ALT', 'ALTSHIFT'];
-charMap[91] = ['COMMANDLEFT', 'COMMANDLEFTSHIFT'];
-charMap[32] = ['SPACE', 'SPACESHIFT'];
-charMap[93] = ['COMMANDRIGHT', 'COMMANDRIGHTSHIFT'];
-charMap[18] = ['ALT', 'ALTSHIFT'];
-charMap[38] = ['UP', 'UPSHIFT'];
-charMap[37] = ['LEFT', 'LEFTSHIFT'];
-charMap[40] = ['DOWN', 'DOWNSHIFT'];
-charMap[39] = ['RIGHT', 'RIGHTSHIFT'];
-
-charMap[33] = ['PAGEUP', 'PAGEUPSHIFT'];
-charMap[34] = ['PAGEDOWN', 'PAGEDOWNSHIFT'];
-charMap[35] = ['PAGERIGHT', 'PAGERIGHTSHIFT'];
-charMap[36] = ['PAGELEFT', 'PAGELEFTSHIFT'];
-
 function Canvas(div, component) {
+    var self = this;
+
     this.div = div;
-    this.component = component;
-    this.initialize();
+    this._component = component;
+
+    this.dragEndtime = Date.now();
+
+    this.canvas = document.createElement('canvas');
+    this.div.appendChild(this.canvas);
+
+    this.canvas.style.outline = 'none';
+
+    // this.focuser = document.createElement('button');
+    // this.focuser.style.position = 'absolute';
+    // this.focuser.style.top = '0px';
+    // this.focuser.style.left = '0px';
+    // this.focuser.style.zIndex = '-1';
+    // this.focuser.style.outline = 'none';
+    // this.div.appendChild(this.focuser);
+
+    this.canvasCTX = this.canvas.getContext('2d');
+    this.gc = new GraphicsContext(this.canvasCTX);
+
+    this.buffer = document.createElement('canvas');
+    this.bufferCTX = this.buffer.getContext('2d');
+    this.bufferGC = new GraphicsContext(this.bufferCTX);
+
+    this.mouseLocation = new rectangular.Point(-1, -1);
+    this.dragstart = new rectangular.Point(-1, -1);
+    //this.origin = new rectangular.Point(0, 0);
+    this.bounds = new rectangular.Rectangle(0, 0, 0, 0);
+    this.hasMouse = false;
+
+    document.addEventListener('mousemove', function(e) {
+        if (self.hasMouse || self.isDragging()) {
+            self.finmousemove(e);
+        }
+    });
+    document.addEventListener('mouseup', function(e) {
+        self.finmouseup(e);
+    });
+    document.addEventListener('wheel', function(e) {
+        self.finwheelmoved(e);
+    });
+    document.addEventListener('keydown', function(e) {
+        self.finkeydown(e);
+    });
+    document.addEventListener('keyup', function(e) {
+        self.finkeyup(e);
+    });
+
+    this.canvas.onmouseover = function() {
+        self.hasMouse = true;
+    };
+    this.canvas.addEventListener('focus', function(e) {
+        self.finfocusgained(e);
+    });
+    this.canvas.addEventListener('blur', function(e) {
+        self.finfocuslost(e);
+    });
+    this.canvas.addEventListener('mousedown', function(e) {
+        self.finmousedown(e);
+    });
+    this.canvas.addEventListener('mouseout', function(e) {
+        self.hasMouse = false;
+        self.finmouseout(e);
+    });
+    this.canvas.addEventListener('click', function(e) {
+        self.finclick(e);
+    });
+    this.canvas.addEventListener('contextmenu', function(e) {
+        self.fincontextmenu(e);
+        e.preventDefault();
+        return false;
+    });
+
+    gestures.addEventListener(this.canvas, 'tap', function(e) {
+        self.fintap(e);
+    });
+    gestures.addEventListener(this.canvas, 'holdpulse', function(e) {
+        self.finholdpulse(e);
+    });
+    gestures.addEventListener(this.canvas, 'flick', function(e) {
+        self.finflick(e);
+    });
+    gestures.addEventListener(this.canvas, 'release', function(e) {
+        self.finrelease(e);
+    });
+    gestures.addEventListener(this.canvas, 'trackstart', function(e) {
+        self.fintrackstart(e);
+    });
+    gestures.addEventListener(this.canvas, 'track', function(e) {
+        self.fintrack(e);
+    });
+    gestures.addEventListener(this.canvas, 'trackend', function(e) {
+        self.fintrackend(e);
+    });
+
+    this.canvas.setAttribute('tabindex', 0);
+    this.canvas.contentEditable = true;
+
+    this.resize();
+
+    this.beginResizing();
+    this.beginPainting();
 }
 
 Canvas.prototype = {
     constructor: Canvas.prototype.constructor,
-    gestures: gestures, // TODO: why do we need this? (was previously at bottom of file)
     div: null,
+    _component: null,
+    gestures: gestures, // TODO: why do we need this? (was previously at bottom of file)
     canvas: null,
     canvasCTX: null,
     focuser: null,
@@ -149,111 +148,6 @@ Canvas.prototype = {
     lastDoubleClickTime: 0,
     dragEndTime: 0,
     lastRepaintTime: 0,
-
-    initialize: function() {
-        var self = this;
-
-        this.dragEndtime = Date.now();
-
-        this.canvas = document.createElement('canvas');
-        this.div.appendChild(this.canvas);
-
-        this.canvas.style.outline = 'none';
-
-        // this.focuser = document.createElement('button');
-        // this.focuser.style.position = 'absolute';
-        // this.focuser.style.top = '0px';
-        // this.focuser.style.left = '0px';
-        // this.focuser.style.zIndex = '-1';
-        // this.focuser.style.outline = 'none';
-        // this.div.appendChild(this.focuser);
-
-        this.canvasCTX = this.canvas.getContext('2d');
-        this.gc = new GraphicsContext(this.canvasCTX);
-
-        this.buffer = document.createElement('canvas');
-        this.bufferCTX = this.buffer.getContext('2d');
-        this.bufferGC = new GraphicsContext(this.bufferCTX);
-
-        this.mouseLocation = new rectangular.Point(-1, -1);
-        this.dragstart = new rectangular.Point(-1, -1);
-        //this.origin = new rectangular.Point(0, 0);
-        this.bounds = new rectangular.Rectangle(0, 0, 0, 0);
-        this.hasMouse = false;
-
-        document.addEventListener('mousemove', function(e) {
-            if (self.hasMouse || self.isDragging()) {
-                self.finmousemove(e);
-            }
-        });
-        document.addEventListener('mouseup', function(e) {
-            self.finmouseup(e);
-        });
-        document.addEventListener('wheel', function(e) {
-            self.finwheelmoved(e);
-        });
-        document.addEventListener('keydown', function(e) {
-            self.finkeydown(e);
-        });
-        document.addEventListener('keyup', function(e) {
-            self.finkeyup(e);
-        });
-
-        this.canvas.onmouseover = function() {
-            self.hasMouse = true;
-        };
-        this.canvas.addEventListener('focus', function(e) {
-            self.finfocusgained(e);
-        });
-        this.canvas.addEventListener('blur', function(e) {
-            self.finfocuslost(e);
-        });
-        this.canvas.addEventListener('mousedown', function(e) {
-            self.finmousedown(e);
-        });
-        this.canvas.addEventListener('mouseout', function(e) {
-            self.hasMouse = false;
-            self.finmouseout(e);
-        });
-        this.canvas.addEventListener('click', function(e) {
-            self.finclick(e);
-        });
-        this.canvas.addEventListener('contextmenu', function(e) {
-            self.fincontextmenu(e);
-            e.preventDefault();
-            return false;
-        });
-
-        gestures.addEventListener(this.canvas, 'tap', function(e) {
-            self.fintap(e);
-        });
-        gestures.addEventListener(this.canvas, 'holdpulse', function(e) {
-            self.finholdpulse(e);
-        });
-        gestures.addEventListener(this.canvas, 'flick', function(e) {
-            self.finflick(e);
-        });
-        gestures.addEventListener(this.canvas, 'release', function(e) {
-            self.finrelease(e);
-        });
-        gestures.addEventListener(this.canvas, 'trackstart', function(e) {
-            self.fintrackstart(e);
-        });
-        gestures.addEventListener(this.canvas, 'track', function(e) {
-            self.fintrack(e);
-        });
-        gestures.addEventListener(this.canvas, 'trackend', function(e) {
-            self.fintrackend(e);
-        });
-
-        this.canvas.setAttribute('tabindex', 0);
-        this.canvas.contentEditable = true;
-
-        this.resize();
-
-        this.beginResizing();
-        this.beginPainting();
-    },
 
     addEventListener: function(name, callback) {
         this.canvas.addEventListener(name, callback);
@@ -288,21 +182,17 @@ Canvas.prototype = {
         this.stopResizing();
     },
 
-    isHiDPI: function() {
-        return this.canvas.getAttribute('hidpi') !== null;
+    useHiDPI: function() {
+        return this._component.resolveProperty('useHiDPI');
     },
 
     useBitBlit: function() {
-        return false; //this.canvas.getAttribute('bitblit') !== 'false';
+        return this._component.resolveProperty('useBitBlit');
     },
 
     getFPS: function() {
-        var fps = this.canvas.parentElement.getAttribute('fps');
+        var fps = this._component.resolveProperty('repaintIntervalRate');
         return fps ? parseInt(fps) : 0;
-    },
-
-    getComponent: function() {
-        return this.component;
     },
 
     tickPaint: function(now) {
@@ -367,20 +257,17 @@ Canvas.prototype = {
     },
 
     resize: function() {
-        this.size = this.div.getBoundingClientRect();
+        var box = this.size = this.div.getBoundingClientRect();
 
-        this.canvas.width = this.div.clientWidth;
-        this.canvas.height = this.div.clientHeight;
-
-        this.buffer.width = this.div.clientWidth;
-        this.buffer.height = this.div.clientHeight;
+        this.canvas.width = this.buffer.width = box.width;
+        this.canvas.height = this.buffer.height = box.height;
 
         //fix ala sir spinka, see
         //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
         //just add 'hdpi' as an attribute to the fin-canvas tag
         var ratio = 1;
         var useBitBlit = this.useBitBlit();
-        var isHIDPI = window.devicePixelRatio && this.isHiDPI();
+        var isHIDPI = window.devicePixelRatio && this.useHiDPI();
         if (isHIDPI) {
             var devicePixelRatio = window.devicePixelRatio || 1;
             var backingStoreRatio = this.canvasCTX.webkitBackingStorePixelRatio ||
@@ -410,9 +297,9 @@ Canvas.prototype = {
         }
 
         //this.origin = new rectangular.Point(Math.round(this.size.left), Math.round(this.size.top));
-        this.bounds = new rectangular.Rectangle(0, 0, this.size.width, this.size.height);
+        this.bounds = new rectangular.Rectangle(0, 0, box.width, box.height);
         //setTimeout(function() {
-        var comp = this.getComponent();
+        var comp = this._component;
         if (comp) {
             comp.setBounds(this.bounds);
         }
@@ -434,7 +321,7 @@ Canvas.prototype = {
         this.safePaintImmediately(function(gc) {
             gc.clearRect(0, 0, self.canvas.width, self.canvas.height);
 
-            var comp = self.getComponent();
+            var comp = self._component;
             if (comp) {
                 comp._paint(gc);
             }
@@ -449,6 +336,8 @@ Canvas.prototype = {
         try {
             gc.save();
             paintFunction(gc);
+        } catch (e) {
+            console.error(e);
         } finally {
             gc.restore();
         }
@@ -487,6 +376,7 @@ Canvas.prototype = {
             this.dragstart = new rectangular.Point(this.mouseLocation.x, this.mouseLocation.y);
         }
         this.mouseLocation = this.getLocal(e);
+        //console.log(this.mouseLocation);
         if (this.isDragging()) {
             this.dispatchNewMouseKeysEvent(e, 'fin-canvas-drag', {
                 dragstart: this.dragstart,
@@ -630,7 +520,7 @@ Canvas.prototype = {
         if (dif < 300) {
             return;
         }
-        this.mouseLocation = this.getLocal(e);
+        //this.mouseLocation = this.getLocal(e);
         this.dispatchNewMouseKeysEvent(e, 'fin-canvas-tap', {
             isRightClick: this.isRightClick(e)
         });
@@ -808,7 +698,115 @@ Canvas.prototype = {
             isRightMB = e.button === 2;
         }
         return isRightMB;
+    },
+
+    dispatchEvent: function(e) {
+        return this.div.dispatchEvent(e);
     }
 };
+
+function paintLoopFunction(now) {
+    if (!paintLoopRunning) {
+        return;
+    }
+    for (var i = 0; i < paintables.length; i++) {
+        try {
+            paintables[i].tickPainter(now);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+    requestAnimationFrame(paintLoopFunction);
+}
+requestAnimationFrame(paintLoopFunction);
+
+
+function resizablesLoopFunction(now) {
+    if (!resizeLoopRunning) {
+        return;
+    }
+    for (var i = 0; i < resizables.length; i++) {
+        try {
+            resizables[i].tickResizer(now);
+        } catch (e) {
+            console.error(e);
+        }
+    }
+}
+setInterval(resizablesLoopFunction, 200);
+
+for (var i = 0, empty = ['', '']; i < 256; i++) {
+    charMap[i] = empty;
+}
+
+charMap[27] = ['ESC', 'ESCSHIFT'];
+charMap[192] = ['`', '~'];
+charMap[49] = ['1', '!'];
+charMap[50] = ['2', '@'];
+charMap[51] = ['3', '#'];
+charMap[52] = ['4', '$'];
+charMap[53] = ['5', '%'];
+charMap[54] = ['6', '^'];
+charMap[55] = ['7', '&'];
+charMap[56] = ['8', '*'];
+charMap[57] = ['9', '('];
+charMap[48] = ['0', ')'];
+charMap[189] = ['-', '_'];
+charMap[187] = ['=', '+'];
+charMap[8] = ['DELETE', 'DELETESHIFT'];
+charMap[9] = ['TAB', 'TABSHIFT'];
+charMap[81] = ['q', 'Q'];
+charMap[87] = ['w', 'W'];
+charMap[69] = ['e', 'E'];
+charMap[82] = ['r', 'R'];
+charMap[84] = ['t', 'T'];
+charMap[89] = ['y', 'Y'];
+charMap[85] = ['u', 'U'];
+charMap[73] = ['i', 'I'];
+charMap[79] = ['o', 'O'];
+charMap[80] = ['p', 'P'];
+charMap[219] = ['[', '{'];
+charMap[221] = [']', '}'];
+charMap[220] = ['\\', '|'];
+charMap[220] = ['CAPSLOCK', 'CAPSLOCKSHIFT'];
+charMap[65] = ['a', 'A'];
+charMap[83] = ['s', 'S'];
+charMap[68] = ['d', 'D'];
+charMap[70] = ['f', 'F'];
+charMap[71] = ['g', 'G'];
+charMap[72] = ['h', 'H'];
+charMap[74] = ['j', 'J'];
+charMap[75] = ['k', 'K'];
+charMap[76] = ['l', 'L'];
+charMap[186] = [';', ':'];
+charMap[222] = ['\'', '|'];
+charMap[13] = ['RETURN', 'RETURNSHIFT'];
+charMap[16] = ['SHIFT', 'SHIFT'];
+charMap[90] = ['z', 'Z'];
+charMap[88] = ['x', 'X'];
+charMap[67] = ['c', 'C'];
+charMap[86] = ['v', 'V'];
+charMap[66] = ['b', 'B'];
+charMap[78] = ['n', 'N'];
+charMap[77] = ['m', 'M'];
+charMap[188] = [',', '<'];
+charMap[190] = ['.', '>'];
+charMap[191] = ['/', '?'];
+charMap[16] = ['SHIFT', 'SHIFT'];
+charMap[17] = ['CTRL', 'CTRLSHIFT'];
+charMap[18] = ['ALT', 'ALTSHIFT'];
+charMap[91] = ['COMMANDLEFT', 'COMMANDLEFTSHIFT'];
+charMap[32] = ['SPACE', 'SPACESHIFT'];
+charMap[93] = ['COMMANDRIGHT', 'COMMANDRIGHTSHIFT'];
+charMap[18] = ['ALT', 'ALTSHIFT'];
+charMap[38] = ['UP', 'UPSHIFT'];
+charMap[37] = ['LEFT', 'LEFTSHIFT'];
+charMap[40] = ['DOWN', 'DOWNSHIFT'];
+charMap[39] = ['RIGHT', 'RIGHTSHIFT'];
+
+charMap[33] = ['PAGEUP', 'PAGEUPSHIFT'];
+charMap[34] = ['PAGEDOWN', 'PAGEDOWNSHIFT'];
+charMap[35] = ['PAGERIGHT', 'PAGERIGHTSHIFT'];
+charMap[36] = ['PAGELEFT', 'PAGELEFTSHIFT'];
 
 module.exports = Canvas;

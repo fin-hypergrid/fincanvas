@@ -1,10 +1,10 @@
 {
-  "name": "finanalytics",
-  "version": "0.1.2",
-  "description": "Openfin Analytics - Data transformations on arrays of congruent JavaScript objects.",
+  "name": "fincanvas",
+  "version": "0.9.0",
+  "description": "Openfin Canvas support.",
   "repository": {
     "type": "git",
-    "url": "git://github.com/openfin/finanalytics.git"
+    "url": "git://github.com/openfin/fincanvas.git"
   },
   "main": "index.js",
   "scripts": {
