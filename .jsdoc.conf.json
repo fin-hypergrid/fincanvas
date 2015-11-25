@@ -1,10 +1,11 @@
 {
     "tags": {
         "allowUnknownTags": true,
-        "dictionaries": ["jsdoc","closure"]
+        "dictionaries": ["jsdoc", "closure"]
     },
     "source": {
-        "include": "src/js"
+        "include": ["index.js", "js"],
+        "exclude": ["js/polymergestures.dev.js"]
     },
     "plugins": ["plugins/markdown"],
     "markdown": {

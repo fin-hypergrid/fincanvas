@@ -5,7 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <title>fincanvas</title>
-    <script src="main.js"></script>
+    <script src="fincanvas.js"></script>
+    <!--<script src="fincanvas.min.js"></script>-->
     <style>
         body {
             font-family: sans-serif;
@@ -39,7 +40,14 @@
                 setBounds: function(rectangle) {
                     this.bounds = rectangle;
                 },
-                _paint: main
+                _paint: main,
+                resolveProperty: function(key) {
+                    return {
+                        useBitBlit: true,
+                        useHiDPI: true,
+                        repaintIntervalRate: 60
+                    }[key];
+                }
             };
          var c = new fin.Canvas(div, component),
             eventNames = [

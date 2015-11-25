@@ -1,6 +1,5 @@
 .DS_Store
-.idea
-node_modules
-doc
-build
-index.js
+/.idea
+/build/fincanvas.*
+/doc
+/node_modules

@@ -1,11 +1,42 @@
 'use strict';
 
-function GraphicsContext(gc) {
+var consoleLogger = require('./gc-console-logger');
+
+/**
+ * @constructor
+ * @param gc - The 2-D graphics context from your canvas
+ * @param {boolean|apiLogger} [logger=true]
+ * * `true` uses `gc-console-logger` function bound to 'gc.' as prefix
+ * * string uses `gc-console-logger` function bound to string
+ * * function used as is
+ */
+function GraphicsContext(gc, logger) {
     this.gc = gc;
 
     var self = this;
     var reWEBKIT = /^webkit/;
-    var logger; // = consoleLogger;
+
+    switch (typeof logger) {
+
+        case 'string':
+            logger =  consoleLogger.bind(undefined, logger + '.');
+            break;
+
+        case 'boolean':
+            if (logger === true) {
+                logger = consoleLogger.bind(undefined, 'gc.');
+            }
+            break;
+
+        case 'function':
+            if (logger.length !== 3) {
+                throw 'GraphicsContext: User-supplied API logger function does not accept three parameters.';
+            }
+            break;
+
+        default:
+            logger = false;
+    }
 
     // Stub out all the prototype members of the canvas 2D graphics context:
     Object.keys(Object.getPrototypeOf(gc)).forEach(MakeStub);
@@ -34,38 +65,6 @@ function GraphicsContext(gc) {
             });
         }
     }
-}
-
-var YIELDS = '\u27F9'; // LONG RIGHTWARDS DOUBLE ARROW
-
-function consoleLogger(name, args, value) { // eslint-disable-line no-unused-vars
-    var result = value;
-
-    if (typeof value === 'string') {
-        result = '"' + result + '"';
-    }
-
-    name = 'GC.' + name;
-
-    switch (args) {
-        case 'getter':
-            console.log(name, '=', result);
-            break;
-
-        case 'setter':
-            console.log(name, YIELDS, result);
-            break;
-
-        default: // method call
-            name += '(' + Array.prototype.slice.call(args).join(', ') + ')';
-            if (result === undefined) {
-                console.log(name);
-            } else {
-                console.log(name, YIELDS, result);
-            }
-    }
-
-    return value;
 }
 
 module.exports = GraphicsContext;

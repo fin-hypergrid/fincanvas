@@ -7,18 +7,11 @@ var gulp        = require('gulp'),
     exec        = require('child_process').exec,
     path        = require('path');
 
-var srcDir   = './src/',
+var srcDir   = './js/',
     testDir  = './test/',
     jsDir    = srcDir + 'js/',
     jsFiles  = '**/*.js',
     buildDir = './build/';
-
-//var isBuilding = false;
-
-var js = {
-    dir   : jsDir,
-    files : jsDir + jsFiles
-};
 
 //  //  //  //  //  //  //  //  //  //  //  //
 
@@ -26,28 +19,27 @@ gulp.task('lint', lint);
 gulp.task('test', test);
 gulp.task('doc', doc);
 gulp.task('beautify', beautify);
-gulp.task('browserify', browserify);
-gulp.task('browserSyncLaunchServer', browserSyncLaunchServer);
-gulp.task('copyStaticFiles', function() {
-    return gulp.src(srcDir + '*.html')
-        .pipe(gulp.dest(buildDir));
+gulp.task('browserify', function(callback) {
+    browserify();
+    browserifyMin();
+    callback();
 });
+gulp.task('browserSyncLaunchServer', browserSyncLaunchServer);
 
 gulp.task('build', function(callback) {
     clearBashScreen();
     runSequence(
         'lint',
-        'test',
+        //'test',
         'doc',
         //'beautify',
         'browserify',
-        'copyStaticFiles',
         callback
     );
 });
 
 gulp.task('watch', function () {
-    gulp.watch([srcDir + '**', testDir + '**'], ['build']);
+    gulp.watch(['index.*', srcDir + '**', testDir + '**'], ['build']);
     gulp.watch([buildDir + '**'])
         .on('change', function(event) {
             browserSync.reload();
@@ -59,7 +51,7 @@ gulp.task('default', ['build', 'watch'], browserSyncLaunchServer);
 //  //  //  //  //  //  //  //  //  //  //  //
 
 function lint() {
-    return gulp.src(js.files)
+    return gulp.src(['index.js', jsDir + jsFiles])
         .pipe($$.excludeGitignore())
         .pipe($$.eslint())
         .pipe($$.eslint.format())
@@ -72,23 +64,32 @@ function test(cb) {
 }
 
 function beautify() {
-    return gulp.src(js.files)
+    return gulp.src(['index.js', jsDir + jsFiles])
         .pipe($$.beautify()) //apparent bug: presence of a .jsbeautifyrc file seems to force all options to their defaults (except space_after_anon_function which is forced to true) so I deleted the file. Any needed options can be included here.
-        .pipe(gulp.dest(js.dir));
+        .pipe(gulp.dest(jsDir));
 }
 
 function browserify() {
-    return gulp.src(js.dir + 'main.js')
+    return gulp.src(buildDir + 'root.js')
         .pipe($$.browserify({
-            insertGlobals : true,
+            //insertGlobals : true,
             debug : true
         }))
         //.pipe($$.sourcemaps.init({loadMaps: true}))
         // Add transformation tasks to the pipeline here:
-        //.pipe(uglify())
-        //.on('error', $$.gutil.log)
-        //.pipe($$.sourcemaps.write('./'))
-        .pipe(gulp.dest(buildDir));
+
+        .on('error', $$.util.log)
+
+        .pipe($$.rename('fincanvas.js'))
+        .pipe(gulp.dest(buildDir)) // outputs to ./build/fincanvas.js for githup.io publish
+}
+
+function browserifyMin() {
+    return gulp.src(buildDir + 'root.js')
+        .pipe($$.browserify())
+        .pipe($$.uglify())
+        .pipe($$.rename('fincanvas.min.js'))
+        .pipe(gulp.dest(buildDir)); // outputs to ./build/fincanvas.min.js for githup.io publish
 }
 
 function doc(cb) {
@@ -104,11 +105,9 @@ function browserSyncLaunchServer() {
         server: {
             // Serve up our build folder
             baseDir: buildDir,
-            routes: {
-                "/bower_components": "bower_components"
-            }
+            index: "demo.html"
         },
-        port: 5000
+        port: 5008
     });
 }
 
