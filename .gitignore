@@ -1,5 +1,8 @@
 .DS_Store
 /.idea
-/build/fincanvas.*
+/build
 /doc
 /node_modules
+/src/README.md
+/src/LICENSE
+/src/package.json

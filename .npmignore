@@ -1,9 +1,0 @@
-.*
-*.sh
-gulp*
-README.md
-build
-doc
-jsdoc-template
-node_modules
-test

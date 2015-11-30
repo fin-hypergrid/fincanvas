@@ -5,6 +5,7 @@
 if (!window.fin) {
     window.fin = {};
 }
+
 if (!window.fin.Canvas) {
-    window.fin.Canvas = require('../');
+    window.fin.Canvas = require('./');
 }

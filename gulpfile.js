@@ -7,10 +7,9 @@ var gulp        = require('gulp'),
     exec        = require('child_process').exec,
     path        = require('path');
 
-var srcDir   = './js/',
+var name     = 'fincanvas',
+    srcDir   = './src/',
     testDir  = './test/',
-    jsDir    = srcDir + 'js/',
-    jsFiles  = '**/*.js',
     buildDir = './build/';
 
 //  //  //  //  //  //  //  //  //  //  //  //
@@ -39,7 +38,7 @@ gulp.task('build', function(callback) {
 });
 
 gulp.task('watch', function () {
-    gulp.watch(['index.*', srcDir + '**', testDir + '**'], ['build']);
+    gulp.watch([srcDir + '**', testDir + '**'], ['build']);
     gulp.watch([buildDir + '**'])
         .on('change', function(event) {
             browserSync.reload();
@@ -51,7 +50,7 @@ gulp.task('default', ['build', 'watch'], browserSyncLaunchServer);
 //  //  //  //  //  //  //  //  //  //  //  //
 
 function lint() {
-    return gulp.src(['index.js', jsDir + jsFiles])
+    return gulp.src(srcDir + '**/*.js')
         .pipe($$.excludeGitignore())
         .pipe($$.eslint())
         .pipe($$.eslint.format())
@@ -64,13 +63,13 @@ function test(cb) {
 }
 
 function beautify() {
-    return gulp.src(['index.js', jsDir + jsFiles])
+    return gulp.src(srcDir + '**/*.js')
         .pipe($$.beautify()) //apparent bug: presence of a .jsbeautifyrc file seems to force all options to their defaults (except space_after_anon_function which is forced to true) so I deleted the file. Any needed options can be included here.
         .pipe(gulp.dest(jsDir));
 }
 
 function browserify() {
-    return gulp.src(buildDir + 'root.js')
+    return gulp.src(srcDir + 'browserify_root.js')
         .pipe($$.browserify({
             //insertGlobals : true,
             debug : true
@@ -80,15 +79,15 @@ function browserify() {
 
         .on('error', $$.util.log)
 
-        .pipe($$.rename('fincanvas.js'))
-        .pipe(gulp.dest(buildDir)) // outputs to ./build/fincanvas.js for githup.io publish
+        .pipe($$.rename(name + '.js'))
+        .pipe(gulp.dest(buildDir)); // outputs to ./build/fincanvas.js for githup.io publish
 }
 
 function browserifyMin() {
-    return gulp.src(buildDir + 'root.js')
+    return gulp.src(srcDir + 'browserify_root.js')
         .pipe($$.browserify())
         .pipe($$.uglify())
-        .pipe($$.rename('fincanvas.min.js'))
+        .pipe($$.rename(name + '.min.js'))
         .pipe(gulp.dest(buildDir)); // outputs to ./build/fincanvas.min.js for githup.io publish
 }
 

@@ -1,4 +1,4 @@
-#fincanvas
+# fincanvas
 
 Openfin's HTML canvas++ wrapper.
 
