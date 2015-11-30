@@ -1,6 +1,6 @@
 .DS_Store
 /.idea
-/build
+/build/*.js
 /doc
 /node_modules
 /src/README.md
