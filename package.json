@@ -1,6 +1,6 @@
 {
   "name": "fincanvas",
-  "version": "0.9.9",
+  "version": "1.0.1",
   "description": "Openfin's HTML canvas++ wrapper.",
   "repository": {
     "type": "git",
@@ -13,7 +13,7 @@
   "author": "SWirts, JEiten",
   "license": "MIT",
   "dependencies": {
-    "rectangular": "^1.0.0"
+    "rectangular": "^1.0.1"
   },
   "devDependencies": {
     "browser-sync": "^2.9.1",

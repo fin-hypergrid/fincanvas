@@ -390,7 +390,7 @@ Canvas.prototype = {
     },
 
     finmousedown: function(e) {
-        this.mouseLocation = this.getLocal(e);
+        this.mouseLocation = this.mouseDownLocation = this.getLocal(e);
         this.mousedown = true;
 
         this.dispatchNewMouseKeysEvent(e, 'fin-canvas-mousedown', {
@@ -521,7 +521,12 @@ Canvas.prototype = {
         if (dif < 300) {
             return;
         }
-        //this.mouseLocation = this.getLocal(e);
+
+        if (this.mouseDownLocation) { // maybe no mousedown on a phone?
+            this.mouseLocation = this.mouseDownLocation; // mouse may have moved since mousedown
+            this.mouseDownLocation = undefined; // consume it (maybe not needed; once a mousedown always a mousedown)
+        }
+
         this.dispatchNewMouseKeysEvent(e, 'fin-canvas-tap', {
             isRightClick: this.isRightClick(e)
         });
