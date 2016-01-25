@@ -763,7 +763,8 @@ function makeCharMap() {
     map[48] = ['0', ')'];
     map[189] = ['-', '_'];
     map[187] = ['=', '+'];
-    map[8] = ['DELETE', 'DELETESHIFT'];
+    map[8] = ['BACKSPACE', 'BACKSPACESHIFT'];
+    map[46] = ['DELETE', 'DELETESHIFT'];
     map[9] = ['TAB', 'TABSHIFT'];
     map[81] = ['q', 'Q'];
     map[87] = ['w', 'W'];
@@ -816,8 +817,21 @@ function makeCharMap() {
 
     map[33] = ['PAGEUP', 'PAGEUPSHIFT'];
     map[34] = ['PAGEDOWN', 'PAGEDOWNSHIFT'];
-    map[35] = ['PAGERIGHT', 'PAGERIGHTSHIFT'];
-    map[36] = ['PAGELEFT', 'PAGELEFTSHIFT'];
+    map[35] = ['PAGERIGHT', 'PAGERIGHTSHIFT']; // END
+    map[36] = ['PAGELEFT', 'PAGELEFTSHIFT']; // HOME
+
+    map[112] = ['F1', 'F1SHIFT'];
+    map[113] = ['F2', 'F2SHIFT'];
+    map[114] = ['F3', 'F3SHIFT'];
+    map[115] = ['F4', 'F4SHIFT'];
+    map[116] = ['F5', 'F5SHIFT'];
+    map[117] = ['F6', 'F6SHIFT'];
+    map[118] = ['F7', 'F7SHIFT'];
+    map[119] = ['F8', 'F8SHIFT'];
+    map[120] = ['F9', 'F9SHIFT'];
+    map[121] = ['F10', 'F10SHIFT'];
+    map[122] = ['F11', 'F1S1HIFT'];
+    map[123] = ['F12', 'F121HIFT'];
 
     return map;
 }
