@@ -4,6 +4,8 @@ Openfin's HTML canvas++ wrapper.
 
 > v1.1.0 - For the *fin-canvas-keydown* and *fin-canvas-keyup* events' parameter `event.detail.char`, added a new value `'BACKSPACE'` to refer to the backspace key. (`'DELETE'` now refers to the actual delete key.) Also added new values `'F1'`..`'F12'` for the function keys.
 
+> v1.1.1 - Increased double-click polling delay from 250 to 325 msecs and made it an option (`doubleClickDelay`). Event `fin-canvas-click` will no longer fire on the first click of a double click; it will only fire once the polling delay has elapsed and there was no second click.
+
 [API](http://openfin.github.io/fincanvas)
 
 [Demo](http://openfin.github.io/fincanvas/demo.html)

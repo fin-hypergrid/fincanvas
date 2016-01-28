@@ -14,11 +14,14 @@ var RESIZE_POLLING_INTERVAL = 200,
     resizeLoopRunning = true,
     charMap = makeCharMap();
 
-function Canvas(div, component) {
+function Canvas(div, component, options) {
     var self = this;
 
     this.div = div;
-    this._component = component;
+    this.component = component;
+
+    options = options || {};
+    this.doubleClickDelay = options.doubleClickDelay || 325;
 
     this.dragEndtime = Date.now();
 
@@ -125,7 +128,7 @@ function Canvas(div, component) {
 Canvas.prototype = {
     constructor: Canvas.prototype.constructor,
     div: null,
-    _component: null,
+    component: null,
     gestures: gestures, // TODO: why do we need this? (was previously at bottom of file)
     canvas: null,
     canvasCTX: null,
@@ -184,15 +187,15 @@ Canvas.prototype = {
     },
 
     useHiDPI: function() {
-        return this._component.resolveProperty('useHiDPI');
+        return this.component.resolveProperty('useHiDPI');
     },
 
     useBitBlit: function() {
-        return this._component.resolveProperty('useBitBlit');
+        return this.component.resolveProperty('useBitBlit');
     },
 
     getFPS: function() {
-        var fps = this._component.resolveProperty('repaintIntervalRate');
+        var fps = this.component.resolveProperty('repaintIntervalRate');
         return fps ? parseInt(fps) : 0;
     },
 
@@ -300,7 +303,7 @@ Canvas.prototype = {
         //this.origin = new rectangular.Point(Math.round(this.size.left), Math.round(this.size.top));
         this.bounds = new rectangular.Rectangle(0, 0, box.width, box.height);
         //setTimeout(function() {
-        var comp = this._component;
+        var comp = this.component;
         if (comp) {
             comp.setBounds(this.bounds);
         }
@@ -322,7 +325,7 @@ Canvas.prototype = {
         this.safePaintImmediately(function(gc) {
             gc.clearRect(0, 0, self.canvas.width, self.canvas.height);
 
-            var comp = self._component;
+            var comp = self.component;
             if (comp) {
                 comp._paint(gc);
             }
@@ -433,16 +436,22 @@ Canvas.prototype = {
     },
 
     finclick: function(e) {
-        if (Date.now() - this.lastClickTime < 250) {
+        if (this.doubleClickTimer && Date.now() - this.lastClickTime < this.doubleClickDelay) {
             //this is a double click...
+            clearTimeout(this.doubleClickTimer); // prevent click event
+            this.doubleClickTimer = undefined;
             this.findblclick(e);
-            return;
+        } else {
+            this.lastClickTime = Date.now();
+
+            this.doubleClickTimer = setTimeout(function() {
+                this.doubleClickTimer = undefined;
+                this.mouseLocation = this.getLocal(e);
+                this.dispatchNewMouseKeysEvent(e, 'fin-canvas-click', {
+                    isRightClick: this.isRightClick(e)
+                });
+            }.bind(this), this.doubleClickDelay);
         }
-        this.mouseLocation = this.getLocal(e);
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-click', {
-            isRightClick: this.isRightClick(e)
-        });
-        this.lastClickTime = Date.now();
     },
 
     finrelease: function(e) {
@@ -618,15 +627,21 @@ Canvas.prototype = {
         if (e.ctrlKey && this.currentKeys.indexOf('CTRL') === -1) {
             this.currentKeys.push('CTRL');
         }
-        if (Date.now() - this.lastClickTime < 250) {
+        if (this.doubleRightClickTimer && Date.now() - this.lastClickTime < this.doubleClickDelay) {
             //this is a double click...
+            clearTimeout(this.doubleRightClickTimer); // prevent context menu event
+            this.doubleRightClickTimer = undefined;
             this.findblclick(e);
-            return;
+        } else {
+            this.lastClickTime = Date.now();
+
+            this.doubleRightClickTimer = setTimeout(function() {
+                this.doubleRightClickTimer = undefined;
+                this.dispatchNewMouseKeysEvent(e, 'fin-canvas-context-menu', {
+                    isRightClick: this.isRightClick(e)
+                });
+            }.bind(this), this.doubleClickDelay);
         }
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-context-menu', {
-            isRightClick: this.isRightClick(e)
-        });
-        this.lastClickTime = Date.now();
     },
 
     repaint: function() {
