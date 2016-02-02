@@ -260,15 +260,11 @@ Canvas.prototype = {
         this.resize();
     },
 
-    setSizeBaseOn: function(element) {
-        var rect = element.getBoundingClientRect();
-        this.canvas.width = this.buffer.width = rect.width;
-        this.canvas.height = this.buffer.height = rect.height;
-        return rect;
-    },
-
     resize: function() {
-        var box = this.size = this.setSizeBaseOn(this.div);
+        var box = this.size = this.div.getBoundingClientRect();
+
+        this.canvas.width = this.buffer.width = box.width;
+        this.canvas.height = this.buffer.height = box.height;
 
         //fix ala sir spinka, see
         //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
@@ -322,9 +318,8 @@ Canvas.prototype = {
 
     paintNow: function() {
         var self = this;
-
         this.safePaintImmediately(function(gc) {
-            self.setSizeBaseOn(self.canvas);
+            gc.clearRect(0, 0, self.canvas.width, self.canvas.height);
 
             var comp = self.component;
             if (comp) {

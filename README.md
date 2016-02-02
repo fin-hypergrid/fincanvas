@@ -6,7 +6,7 @@ Openfin's HTML canvas++ wrapper.
 
 > v1.1.1 - Increased double-click polling delay from 250 to 325 msecs and made it an option (`doubleClickDelay`). Event `fin-canvas-click` will no longer fire on the first click of a double click; it will only fire once the polling delay has elapsed and there was no second click.
 
-> v1.2.0 - Improved `paintNow()` method. Changed renderer "component" public interface method `_paint()` to `paint()` (breaking change).
+> v1.2.1 - Changed renderer "component" public interface method `_paint()` to `paint()` (breaking change).
 
 [API](http://openfin.github.io/fincanvas)
 
