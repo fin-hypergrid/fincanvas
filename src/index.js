@@ -260,11 +260,15 @@ Canvas.prototype = {
         this.resize();
     },
 
-    resize: function() {
-        var box = this.size = this.div.getBoundingClientRect();
+    setSizeBaseOn: function(element) {
+        var rect = element.getBoundingClientRect();
+        this.canvas.width = this.buffer.width = rect.width;
+        this.canvas.height = this.buffer.height = rect.height;
+        return rect;
+    },
 
-        this.canvas.width = this.buffer.width = box.width;
-        this.canvas.height = this.buffer.height = box.height;
+    resize: function() {
+        var box = this.size = this.setSizeBaseOn(this.div);
 
         //fix ala sir spinka, see
         //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
@@ -285,15 +289,11 @@ Canvas.prototype = {
         }
         var width = this.canvas.getAttribute('width');
         var height = this.canvas.getAttribute('height');
-        this.canvas.width = width * ratio;
-        this.canvas.height = height * ratio;
-        this.buffer.width = width * ratio;
-        this.buffer.height = height * ratio;
+        this.canvas.width = this.buffer.width = width * ratio;
+        this.canvas.height = this.buffer.height = height * ratio;
 
-        this.canvas.style.width = width + 'px';
-        this.canvas.style.height = height + 'px';
-        this.buffer.style.width = width + 'px';
-        this.buffer.style.height = height + 'px';
+        this.canvas.style.width = this.buffer.style.width = width + 'px';
+        this.canvas.style.height = this.buffer.style.height = height + 'px';
 
         this.bufferCTX.scale(ratio, ratio);
         if (isHIDPI && !useBitBlit) {
@@ -322,12 +322,13 @@ Canvas.prototype = {
 
     paintNow: function() {
         var self = this;
+
         this.safePaintImmediately(function(gc) {
-            gc.clearRect(0, 0, self.canvas.width, self.canvas.height);
+            self.setSizeBaseOn(self.canvas);
 
             var comp = self.component;
             if (comp) {
-                comp._paint(gc);
+                comp.paint(gc);
             }
 
             self.dirty = false;
