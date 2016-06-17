@@ -8,6 +8,8 @@ Openfin's HTML canvas++ wrapper.
 
 > v1.2.1 - Changed renderer "component" public interface method `_paint()` to `paint()` (breaking change).
 
+> v1.3.0 - Removed gesture support.
+
 [API](http://openfin.github.io/fincanvas)
 
 [Demo](http://openfin.github.io/fincanvas/demo.html)
