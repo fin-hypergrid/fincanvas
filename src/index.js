@@ -4,7 +4,6 @@
 
 var rectangular = require('rectangular');
 
-var gestures = require('./js/polymergestures.dev.js');
 var GraphicsContext = require('./js/GraphicsContext.js');
 
 var RESIZE_POLLING_INTERVAL = 200,
@@ -94,28 +93,6 @@ function Canvas(div, component, options) {
         return false;
     });
 
-    gestures.addEventListener(this.canvas, 'tap', function(e) {
-        self.fintap(e);
-    });
-    gestures.addEventListener(this.canvas, 'holdpulse', function(e) {
-        self.finholdpulse(e);
-    });
-    gestures.addEventListener(this.canvas, 'flick', function(e) {
-        self.finflick(e);
-    });
-    gestures.addEventListener(this.canvas, 'release', function(e) {
-        self.finrelease(e);
-    });
-    gestures.addEventListener(this.canvas, 'trackstart', function(e) {
-        self.fintrackstart(e);
-    });
-    gestures.addEventListener(this.canvas, 'track', function(e) {
-        self.fintrack(e);
-    });
-    gestures.addEventListener(this.canvas, 'trackend', function(e) {
-        self.fintrackend(e);
-    });
-
     this.canvas.setAttribute('tabindex', 0);
     this.canvas.contentEditable = true;
 
@@ -129,14 +106,12 @@ Canvas.prototype = {
     constructor: Canvas.prototype.constructor,
     div: null,
     component: null,
-    gestures: gestures, // TODO: why do we need this? (was previously at bottom of file)
     canvas: null,
     canvasCTX: null,
     focuser: null,
     buffer: null,
     ctx: null,
     mouseLocation: null,
-    holdPulseCount: -1,
     dragstart: null,
     origin: null,
     bounds: null,
@@ -448,93 +423,6 @@ Canvas.prototype = {
                 });
             }.bind(this), this.doubleClickDelay);
         }
-    },
-
-    finrelease: function(e) {
-        this.holdPulseCount = 0;
-        this.mouseLocation = this.getLocal(e);
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-release');
-    },
-
-    finflick: function(e) {
-        if (!this.hasFocus()) {
-            return;
-        }
-        this.mouseLocation = this.getLocal(e);
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-flick', {
-            isRightClick: this.isRightClick(e)
-        });
-    },
-
-    fintrackstart: function(e) {
-        if (!this.hasFocus()) {
-            return;
-        }
-        this.mouseLocation = this.getLocal(e);
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-trackstart');
-    },
-
-    fintrack: function(e) {
-        if (!this.hasFocus()) {
-            return;
-        }
-        this.mouseLocation = this.getLocal(e);
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-track');
-    },
-
-    fintrackend: function(e) {
-        this.mouseLocation = this.getLocal(e);
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-trackend');
-    },
-
-    finhold: function(e) {
-        this.mouseLocation = this.getLocal(e);
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-hold', {
-            isRightClick: this.isRightClick(e)
-        });
-    },
-
-    finholdpulse: function(e) {
-        this.mouseLocation = this.getLocal(e);
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-holdpulse', {
-            count: this.holdPulseCount++
-        });
-    },
-
-    fintap: function(e) {
-        //this nonsense is to hold a tap if it's really a double click
-        var self = this;
-        var now = Date.now();
-        var dif = now - this.lastDoubleClickTime;
-        if (dif < 300) {
-            return;
-        }
-        //dragend is also causing a tap
-        //lets fix this here
-        if (now - this.dragEndtime < 100) {
-            return;
-        }
-        setTimeout(function() {
-            self._fintap(e);
-        }, 180);
-    },
-
-    _fintap: function(e) {
-        //this nonsense is to hold a tap if it's really a double click
-        var now = Date.now();
-        var dif = now - this.lastDoubleClickTime;
-        if (dif < 300) {
-            return;
-        }
-
-        if (this.mouseDownLocation) { // maybe no mousedown on a phone?
-            this.mouseLocation = this.mouseDownLocation; // mouse may have moved since mousedown
-            this.mouseDownLocation = undefined; // consume it (maybe not needed; once a mousedown always a mousedown)
-        }
-
-        this.dispatchNewMouseKeysEvent(e, 'fin-canvas-tap', {
-            isRightClick: this.isRightClick(e)
-        });
     },
 
     findblclick: function(e) {
