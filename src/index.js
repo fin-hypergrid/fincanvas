@@ -238,8 +238,8 @@ Canvas.prototype = {
     resize: function() {
         var box = this.size = this.div.getBoundingClientRect();
 
-        this.canvas.width = this.buffer.width = box.width;
-        this.canvas.height = this.buffer.height = box.height;
+        this.width = box.width;
+        this.height = box.height;
 
         //fix ala sir spinka, see
         //http://www.html5rocks.com/en/tutorials/canvas/hidpi/
@@ -258,13 +258,12 @@ Canvas.prototype = {
             ratio = devicePixelRatio / backingStoreRatio;
             //this.canvasCTX.scale(ratio, ratio);
         }
-        var width = this.canvas.getAttribute('width');
-        var height = this.canvas.getAttribute('height');
-        this.canvas.width = this.buffer.width = width * ratio;
-        this.canvas.height = this.buffer.height = height * ratio;
 
-        this.canvas.style.width = this.buffer.style.width = width + 'px';
-        this.canvas.style.height = this.buffer.style.height = height + 'px';
+        this.buffer.width = this.canvas.width = this.width * ratio;
+        this.buffer.height = this.canvas.height = this.height * ratio;
+
+        this.canvas.style.width = this.buffer.style.width = this.width + 'px';
+        this.canvas.style.height = this.buffer.style.height = this.height + 'px';
 
         this.bufferCTX.scale(ratio, ratio);
         if (isHIDPI && !useBitBlit) {
@@ -272,7 +271,7 @@ Canvas.prototype = {
         }
 
         //this.origin = new rectangular.Point(Math.round(this.size.left), Math.round(this.size.top));
-        this.bounds = new rectangular.Rectangle(0, 0, box.width, box.height);
+        this.bounds = new rectangular.Rectangle(0, 0, this.width, this.height);
         //setTimeout(function() {
         var comp = this.component;
         if (comp) {
@@ -294,7 +293,7 @@ Canvas.prototype = {
     paintNow: function() {
         var self = this;
         this.safePaintImmediately(function(gc) {
-            gc.clearRect(0, 0, self.canvas.width, self.canvas.height);
+            gc.clearRect(0, 0, self.width, self.height);
 
             var comp = self.component;
             if (comp) {
