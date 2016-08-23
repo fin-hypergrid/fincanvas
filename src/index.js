@@ -470,7 +470,7 @@ Canvas.prototype = {
             repeatCount: this.repeatKeyCount,
             repeatStartTime: this.repeatKeyStartTime,
             shift: e.shiftKey,
-            identifier: e.keyIdentifier,
+            identifier: e.key,
             currentKeys: this.currentKeys.slice(0)
         });
     },
@@ -493,7 +493,7 @@ Canvas.prototype = {
             meta: e.metaKey,
             repeat: e.repeat,
             shift: e.shiftKey,
-            identifier: e.keyIdentifier,
+            identifier: e.key,
             currentKeys: this.currentKeys.slice(0)
         });
     },
