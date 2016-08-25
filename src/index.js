@@ -127,6 +127,9 @@ Canvas.prototype = {
     lastDoubleClickTime: 0,
     dragEndTime: 0,
     lastRepaintTime: 0,
+    currentPaintCount: 0,
+    currentFPS: 0,
+    lastFPSComputeTime: 0,
 
     addEventListener: function(name, callback) {
         this.canvas.addEventListener(name, callback);
@@ -174,17 +177,36 @@ Canvas.prototype = {
         return fps ? parseInt(fps) : 0;
     },
 
+    getEnableContinuousRepaint: function () {
+        return this.component.resolveProperty('enableContinuousRepaint');
+    },
+
+    getCurrentFPS:function () {
+        	return this.currentFPS;
+    },
+
+
     tickPaint: function(now) {
         var fps = this.getFPS();
+        var isContinuousRepaint = this.getEnableContinuousRepaint();
         if (fps === 0) {
             return;
         }
         var interval = 1000 / fps;
 
         var elapsed = now - this.lastRepaintTime;
-        if (elapsed > interval && this.dirty) {
-            this.lastRepaintTime = now - (elapsed % interval);
+        if (elapsed > interval && (isContinuousRepaint || this.dirty)) {
             this.paintNow();
+            this.lastRepaintTime = now;
+            /* - (elapsed % interval);*/
+            if (isContinuousRepaint) {
+                this.currentPaintCount++;
+                if (now - this.lastFPSComputeTime >= 1000) {
+                    this.currentFPS = (this.currentPaintCount * 1000) / (now - this.lastFPSComputeTime);
+                    this.currentPaintCount = 0;
+                    this.lastFPSComputeTime = now;
+                }
+            }
         }
     },
 
@@ -470,7 +492,7 @@ Canvas.prototype = {
             repeatCount: this.repeatKeyCount,
             repeatStartTime: this.repeatKeyStartTime,
             shift: e.shiftKey,
-            identifier: e.keyIdentifier,
+            identifier: e.key,
             currentKeys: this.currentKeys.slice(0)
         });
     },
@@ -493,7 +515,7 @@ Canvas.prototype = {
             meta: e.metaKey,
             repeat: e.repeat,
             shift: e.shiftKey,
-            identifier: e.keyIdentifier,
+            identifier: e.key,
             currentKeys: this.currentKeys.slice(0)
         });
     },
