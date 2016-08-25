@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>fincanvas</title>
+    <script src="fincanvas.js"></script>
+    <!--<script src="fincanvas.min.js"></script>-->
+    <style>
+        body {
+            font-family: sans-serif;
+            font-size: small;
+        }
+        #canvas {
+            position: absolute;
+            top: 5%;
+            right: 5%;
+            bottom: 5%;
+            left: 5%;
+        }
+        input {
+            margin-left: .75em;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="button" id="dirtify" value="Make Dirty" style="margin-right: 2em" />
+
+    Paint Loop:
+    <input type="radio" name="paintLoop" value="restartPaintLoop" checked />On
+    <input type="radio" name="paintLoop" value="stopPaintLoop" />Off
+
+    <div id="canvas" fps="60"></div>
+</body>
+    <script>
+        var div = document.querySelector('#canvas'),
+            component = {
+                setBounds: function(rectangle) {
+                    this.bounds = rectangle;
+                },
+                paint: main,
+                resolveProperty: function(key) {
+                    return {
+                        useBitBlit: true,
+                        useHiDPI: true,
+                        repaintIntervalRate: 60
+                    }[key];
+                }
+            };
+         var c = new fin.Canvas(div, component),
+            eventNames = [
+                'dragstart',
+                'drag',
+                'mousemove',
+                'mousedown',
+                'dragend',
+                'mouseup',
+                'mouseout',
+                'wheelmoved',
+                'click',
+                'release',
+                'flick',
+                'trackstart',
+                'track',
+                'trackend',
+                'hold',
+                'holdpulse',
+                'tap',
+                'dblclick',
+                'keydown',
+                'keyup',
+                'focus-gained',
+                'focus-lost',
+                'context-menu'
+            ];
+
+        c.start();
+
+        eventNames.forEach(function(name) {
+            c.addEventListener('fin-canvas-' + name, logEvt);
+        });
+
+        function $(selector) {
+            return Array.prototype.slice.call(document.querySelectorAll(selector));
+        }
+
+        $('input[type=radio][name=paintLoop]').forEach(function(element) {
+            element.onclick = togglePaintLoop;
+        });
+
+        function togglePaintLoop() {
+            if (this.checked) { c[this.value](); }
+        }
+
+        document.querySelector('#dirtify').onclick = function() {
+            c.dirty = true;
+        };
+
+         setInterval(function() {
+             c.repaint();
+         }, 10);
+
+        function logEvt(e) {
+            console.log(e.type);
+        }
+
+        function main(gc) {
+            var rect = this.bounds;
+            gc.beginPath();
+            gc.fillStyle = 'pink';
+            gc.fillRect(0, 0, rect.width, rect.height);
+
+            drawClock.call(this, gc);
+        }
+
+        function drawClock(gc) {
+            var dt = new Date;
+
+            gc.save();
+
+            gc.translate(55, 55);
+
+            // 60 tick marks
+            gc.save();
+            gc.beginPath();
+            for(var intervals = 60, incr = 2 * Math.PI / intervals; intervals--;) {
+                gc.rotate(incr);
+                gc.moveTo(0, 50);
+                gc.lineTo(0, 46);
+            }
+            gc.strokeWidth = 0.5;
+            gc.stroke();
+            gc.restore();
+
+            gc.beginPath();
+
+            // minute hand
+            gc.save();
+            gc.rotate((dt.getMinutes() / 30 - 1) * Math.PI);
+            gc.moveTo(0, 43);
+            gc.lineTo(-2, 30);
+            gc.lineTo(0, -10);
+            gc.lineTo(2, 30);
+            gc.closePath();
+            gc.restore();
+
+            // hour hand
+            gc.save();
+            gc.rotate((dt.getHours() / 6 + dt.getMinutes() / 720 - 1) * Math.PI);
+            gc.moveTo(0, 26);
+            gc.lineTo(-3, 20);
+            gc.lineTo(0, -7);
+            gc.lineTo(3, 20);
+            gc.closePath();
+            gc.restore();
+
+            gc.stroke();
+            gc.fillStyle = 'black';
+            gc.fill();
+
+            // second hand
+            gc.save();
+            gc.beginPath();
+            gc.rotate((dt.getSeconds() / 30 - 1) * Math.PI);
+            gc.moveTo(0, 45);
+            gc.lineTo(0, -10);
+            gc.strokeStyle = 'red';
+            gc.stroke();
+            gc.restore();
+
+            // second hand
+            gc.save();
+            gc.beginPath();
+            gc.rotate((dt.getMilliseconds() / 500 - 1) * Math.PI);
+            gc.moveTo(0, 20);
+            gc.lineTo(0, 0);
+            gc.strokeStyle = 'green';
+            gc.stroke();
+            gc.restore();
+
+            gc.restore();
+        }
+
+    </script>
+</html>
