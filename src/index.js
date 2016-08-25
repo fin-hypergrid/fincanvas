@@ -182,7 +182,7 @@ Canvas.prototype = {
     },
 
     getCurrentFPS:function () {
-        	return this.currentFPS;
+        return this.currentFPS;
     },
 
 
