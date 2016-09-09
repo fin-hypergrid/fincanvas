@@ -2,6 +2,8 @@
 
 Openfin's HTML canvas++ wrapper.
 
+> v1.4.1 - Polyfill for `CustomEvent` for IE11.
+
 > v1.4.0 - The `event.details.identifier` object passed to `finKeyDown` and `finKeyUp` events now reflects `KeyboardEvent.key` rather than the now-deprecated (as of Chromium M53) `KeyboardEvent.keyIdentifier`. The possible values in these two properties are _similar_ but not _identical_. See the deprecated [keyIdentifier list](https://www.w3.org/TR/2009/WD-DOM-Level-3-Events-20090908/#keyset-keyidentifiers) _vs._ the supported [key list](https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key#Key_values). (Note that neither `fin-canvas` itself nor `fin-hypergrid` seem to have any references to `details.identifier`.)
 
 > v1.3.0 - Removed gesture support; corrected clearRect dimensions on zoom.

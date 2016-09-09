@@ -1,6 +1,6 @@
 {
   "name": "fincanvas",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Openfin's HTML canvas++ wrapper.",
   "repository": {
     "type": "git",
